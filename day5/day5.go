@@ -28,9 +28,9 @@ func newRuleBook() *RuleBook {
 // Add a rule to the rule book collection
 func (b *RuleBook) AddRule(x, y int) error {
 	// Ensure a rule doesn't already exist for these pages
-	_, err := b.GetRule(x, y)
+	_, ok := b.GetRule(x, y)
 
-	if err == nil {
+	if ok {
 		return errors.New("order rule already exists")
 	}
 
@@ -41,14 +41,14 @@ func (b *RuleBook) AddRule(x, y int) error {
 
 // Retrieve a rule from the book given the two numbers
 // Numbers can be in either order
-func (b *RuleBook) GetRule(page1, page2 int) (OrderRule, error) {
+func (b *RuleBook) GetRule(page1, page2 int) (OrderRule, bool) {
 	for _, rule := range b.rules {
 		if (rule.x == page1 && rule.y == page2) || (rule.x == page2 && rule.y == page1) {
-			return rule, nil
+			return rule, true
 		}
 	}
 
-	return OrderRule{}, errors.New("rule not found")
+	return OrderRule{}, false
 }
 
 // A page update contains a series of page numbers that are expected to satisfy the rule book
@@ -61,9 +61,9 @@ func (u *PageUpdate) PassesRules(ruleBook *RuleBook) bool {
 			x := (*u)[i]
 			y := (*u)[j]
 
-			rule, err := ruleBook.GetRule(x, y)
+			rule, ok := ruleBook.GetRule(x, y)
 
-			if err == nil {
+			if ok {
 				// Does rule match the order the number pair is in?
 				if rule.x != x && rule.y != y {
 					return false
@@ -85,9 +85,9 @@ func (u *PageUpdate) Fix(ruleBook *RuleBook) PageUpdate {
 			x := fixed[i]
 			y := fixed[j]
 
-			rule, err := ruleBook.GetRule(x, y)
+			rule, ok := ruleBook.GetRule(x, y)
 
-			if err == nil {
+			if ok {
 				// Does rule match the order the number pair is in?
 				// If not, swap them!
 				if rule.x != x && rule.y != y {

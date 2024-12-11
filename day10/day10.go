@@ -54,7 +54,7 @@ func main() {
 
 			if pos == TrailHead {
 				score += trailheadScore(tmap, pt)
-				rating += completableTrails(tmap, pt)
+				rating += trailheadRating(tmap, pt)
 			}
 		}
 	}
@@ -126,33 +126,11 @@ func trailheadScore(tmap topographyMap, pt point) int {
 	return len(uniqueTails)
 }
 
-// Returns the number of unique trails from the given point that ultimately reach a tail
-// This is known as the trail rating
-func completableTrails(tmap topographyMap, pt point) int {
-	height := tmap.positions[pt]
-	count := 0
+// Trail rating is the number of unique trails from the given point that ultimately reach a tail
+func trailheadRating(tmap topographyMap, pt point) int {
+	tails := completableTails(tmap, pt)
 
-	// Rotate around current position looking for heights 1 greater than the current point, or 9 which is the trail tail
-	dir := vec{0, -1}
-
-	for i := 0; i < 4; i++ {
-		candidatePt := point{pt.x + dir.x, pt.y + dir.y}
-
-		if candidate, ok := tmap.positions[candidatePt]; ok {
-			if candidate == TrailTail && height == TrailTail-1 {
-				// A tail has been found! Add to the count
-				count++
-			} else if candidate == height+1 {
-				// A node has been found with a height 1 greater than our own, which means we can walk there!
-				// Do a recursive call to walk there and keep following the trail!
-				count += completableTrails(tmap, candidatePt)
-			}
-		}
-
-		dir = vec{-dir.y, dir.x}
-	}
-
-	return count
+	return len(tails)
 }
 
 // Returns a list of tails that can be reached from the given point
